@@ -7,6 +7,7 @@ resource "aws_instance" "Latihan_ec2PKM" {
     instance_type   = "t3.micro"
     key_name        = aws_key_pair.latihanKeyPairPKM.key_name
     vpc_security_group_ids = [aws_security_group.latihan-security-group-PKM.id]
+    subnet_id              = aws_subnet.latihan_subnet_public_pkm.id
     user_data = "${file ("scriptku.sh")}"
 
     tags = {
@@ -16,6 +17,7 @@ resource "aws_instance" "Latihan_ec2PKM" {
 
 resource "aws_security_group" "latihan-security-group-PKM" {
     description = "Allow limited inboud external traffic"
+    vpc_id = aws_vpc.latihan_vpc_pkm.id
     name = "latihan_sg"
 
     ingress {
