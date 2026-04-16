@@ -8,7 +8,7 @@ resource "aws_vpc" "latihan_vpc_pkm" {
   }
 }
 
-resource "aws_internet_gateway" "latihan_igw_pkm" {
+resource "aws_internet_gateway" "latihan_igw_mpk" {
   vpc_id = aws_vpc.latihan_vpc_pkm.id
 
   tags = {
