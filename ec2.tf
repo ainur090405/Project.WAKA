@@ -17,6 +17,13 @@ resource "aws_security_group" "latihan-security-group-PKM" {
         to_port = 8080
     }
 
+    ingress {
+        protocol    = "icmp"
+        cidr_blocks = ["0.0.0.0/0"]
+        from_port   = -1
+        to_port     = -1
+    }
+
     egress {
         protocol = -1
         cidr_blocks = ["0.0.0.0/0"]
@@ -67,5 +74,18 @@ resource "aws_instance" "Latihan_private_ec2PKM" {
 
     tags = {
         Name = "Latihan-private-ec2PKM"
+    }
+}
+
+resource "aws_instance" "Latihan_private_ec2PKM_2" {
+    ami             = "ami-0ef6d0055be7553ee"
+    instance_type   = "t3.micro"
+    key_name        = aws_key_pair.latihanKeyPairPKM.key_name
+    vpc_security_group_ids = [aws_security_group.latihan-security-group-PKM.id]
+    subnet_id              = aws_subnet.latihan_subnet_private_pkm.id
+    associate_public_ip_address = false
+
+    tags = {
+        Name = "Latihan-private-ec2PKM-2"
     }
 }
