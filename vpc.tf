@@ -1,7 +1,7 @@
 resource "aws_vpc" "latihan_vpc_pkm" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_support   = true
+  cidr_block           = "10.0.0.0/18"
   enable_dns_hostnames = true
+  enable_dns_support   = true
 
   tags = {
     Name = "latihan-vpc-PKM"
@@ -27,6 +27,17 @@ resource "aws_subnet" "latihan_subnet_public_pkm" {
   }
 }
 
+resource "aws_subnet" "latihan_subnet_public2_pkm" {
+  vpc_id                  = aws_vpc.latihan_vpc_pkm.id
+  cidr_block              = "10.0.3.0/24"
+  map_public_ip_on_launch = true
+  availability_zone       = "ap-southeast-2b"
+
+  tags = {
+    Name = "latihan-subnet-public2-PKM"
+  }
+}
+
 resource "aws_subnet" "latihan_subnet_private_pkm" {
   vpc_id                  = aws_vpc.latihan_vpc_pkm.id
   cidr_block              = "10.0.1.0/24"
@@ -35,6 +46,17 @@ resource "aws_subnet" "latihan_subnet_private_pkm" {
 
   tags = {
     Name = "latihan-subnet-private-PKM"
+  }
+}
+
+resource "aws_subnet" "latihan_subnet_private2_pkm" {
+  vpc_id                  = aws_vpc.latihan_vpc_pkm.id
+  cidr_block              = "10.0.2.0/24"
+  map_public_ip_on_launch = false
+  availability_zone       = "ap-southeast-2c"
+
+  tags = {
+    Name = "latihan-subnet-private2-PKM"
   }
 }
 
@@ -56,22 +78,23 @@ resource "aws_route_table_association" "latihan_rta_public_pkm" {
   route_table_id = aws_route_table.latihan_rt_public_pkm.id
 }
 
+resource "aws_route_table_association" "latihan_rta_public2_pkm" {
+  subnet_id      = aws_subnet.latihan_subnet_public2_pkm.id
+  route_table_id = aws_route_table.latihan_rt_public_pkm.id
+}
+
 resource "aws_network_acl" "latihan_acl_pkm" {
   vpc_id = aws_vpc.latihan_vpc_pkm.id
 
-  # Inbound: Block ICMP/ping dari semua IP
   ingress {
-    protocol   = "icmp"
+    protocol   = "tcp"
     rule_no    = 100
-    action     = "deny"
+    action     = "allow"
     cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    icmp_type  = -1
-    icmp_code  = -1
+    from_port  = 3306
+    to_port    = 3306
   }
 
-  # Inbound: Allow SSH (port 22) dari semua IP
   ingress {
     protocol   = "tcp"
     rule_no    = 101
@@ -81,7 +104,6 @@ resource "aws_network_acl" "latihan_acl_pkm" {
     to_port    = 22
   }
 
-  # Outbound: Allow semua protokol dan semua port
   egress {
     protocol   = "-1"
     rule_no    = 100
@@ -92,7 +114,7 @@ resource "aws_network_acl" "latihan_acl_pkm" {
   }
 
   tags = {
-    Name = "latihan-acl-PKM"
+    Name = "acl-PKM"
   }
 }
 
@@ -101,3 +123,7 @@ resource "aws_network_acl_association" "latihan_acl_assoc_pkm" {
   subnet_id      = aws_subnet.latihan_subnet_private_pkm.id
 }
 
+resource "aws_network_acl_association" "latihan_acl_assoc2_pkm" {
+  network_acl_id = aws_network_acl.latihan_acl_pkm.id
+  subnet_id      = aws_subnet.latihan_subnet_private2_pkm.id
+}
