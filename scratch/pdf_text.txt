@@ -1,0 +1,217 @@
+Pertemuan 12
+Auto Scaling
+Joko Prasetyo, S.ST., M.Kom.
+Auto Scaling
+Suatu mekanisme yang membuat suatu resource membersar dan mengecil 
+secara otomatis sesuai dengan kondisi-kondisi tertentu 
+Contoh: 
+● terdapat 2 server ec2, yaitu ec2 a dan ec2b, yang mana jika resource ec2a 
+dan resource ec2b terpakai semua, maka akan resource ec2 tambahan akan 
+tergenerate otomatis
+Arsitektur
+vpc
+Public 
+subnet
+Private 
+subnet
+Private 
+subnet
+Availability zone A
+Availability zone B
+Router 
+public
+Internet 
+Gateway
+RD
+S
+RD
+S
+EC2
+Replica RDS
+Public 
+subnetEC2 Router 
+public
+Load 
+Balancer
+Auto scaling 
+group
+provider.tf
+provider
+Sesuaikan region
+
+vpc.tf
+VPC
+Ganti latihan-vpc menjadi latihan-vpc-nama_kelompok
+
+Access control list (ACL)
+Mengontrol akses lalu-lintas pada tingkat 
+subnet
+Akses inbound:
+mysql/mariadb(3306) (allow)
+ssh(22) (allow)
+Akses outbound:
+Semua protokol dan semua port
+Availability Zone a
+● Ganti latihan-public-subnet menjadi 
+latihan-public-subnet-nama_kelompok
+● Ganti latihan-private-subnet menjadi 
+latihan-private-subnet-nama_kelompok
+
+Availability Zone b
+Ganti latihan-public-subnet2 menjadi 
+latihan-public-subnet2-nama_kelompok
+Ganti latihan-private-subnet2 menjadi 
+latihan-private-subnet2-nama_kelompok
+
+Asosiasi ACL dengan private subnet
+● Menghubungkan acl dan private subnet
+● Ganti latihan-acl-assoc menjadi 
+latihan-acl-assoc-nama_kelompok
+● Ganti latihan-acl-assoc2 menjadi 
+latihan-acl-assoc2-nama_kelompok 
+
+Internet gateway
+Ganti nama latihan-igw menjadi 
+latihan-igw-nama_kelompok
+
+Router table public
+Ganti latihan-public-rt menjadi 
+latihan-rt-nama_kelompok
+
+Asosiasi Public Subnet dan Router Public
+Ganti nama latihan-public-rta menjadi 
+latihan-public-rta-nama_kelompok
+Ganti nama latihan-public-rta2 menjadi 
+latihan-public-rta2-nama_kelompok
+
+EC2.tf
+Security Group untuk EC2
+Ganti nama latihan-security-group menjadi 
+latihan-security-group-nama_kelompok
+
+Key Pair
+Ganti nama latihanKeyPair menjadi 
+latihan_key_pair_nama_kelompok
+
+Data template file
+Data variable yang dapat digunakan 
+untuk memasukkan variable ke suatu 
+file, dalam kasus ini variable 
+dimasukkan ke dalam file scriptku.sh
+Ganti user_data menjadi 
+user_data_nama_kelompok
+
+scriptku.sh
+
+EC2 instance (update)
+● Meletakkan EC2 instance 
+pada public subnet
+● Hapus yang di dalam tanda 
+kotak merah
+
+rds.tf
+Subnet group RDS
+● Subnet group berisi lokasi private subnet yang akan digunakan oleh RDS, biasanya 
+lebih dari satu private subnet, dengan masing-masing private subnet berada pada 
+availability zone yang berbeda
+● Ganti nama latihan_subnet_db menjadi latihan_subnet_db_nama_kelompok
+
+Security group untuk RDS
+Ganti nama rds menjadi 
+latihan-rds-sg-nama_kelompok
+
+RDS 
+● multi_az digunakan untuk membuat replikasi RDS ke availability zone lain
+● Ganti nama latihan_db_rds menjadi latihan_db_rds_nama_kelompok
+
+lb.tf
+Load balancer
+Digunakan untuk menyeimbangkan lalu lintas data ke beberapa server secara 
+merata
+Jenis load balancer
+
+Load balancer target group
+
+Mengasosiasi target group dengan instance (hapus)
+Hapus script berikut
+
+Load balancer listener
+
+autoscaling.tf
+Launch template
+Menentukan image/os yang dipake serta konfigurasinya
+Ganti latihan-launch-template menjadi latihan-launch-template-nama_kelompok
+
+Autoscalling group
+Menentukan ukuran dari resource yang akan digenerate
+Ganti latihan-autoscaling-group menjadi 
+latihan-autoscaling-group-nama_kelompok
+
+Autoscaling policy
+● Menentukan aturan kapan resource 
+harus mengecil atau membesar
+● Auto scaling berdasarkan 
+penggunaan CPU rata-rata, ada 
+juga pilihan penggunaan traffic 
+jaringan rata-rata, dll, pilih sesuai 
+kebutuhan
+● Beri nilai penggunaan cpu rata-rata 
+sebesar 60 persen
+● Ganti latihan-auto-policy menjadi 
+latihan-auto-policy-nama_kelompok
+
+Eksekusi
+● terraform init
+● terraform plan
+● terraform apply (jika terjadi error access denied, lakukan kembali terraform 
+plan)
+Jalankan aplikasi web
+● Buka browser, kemudian copy alamat dns pada menu load balancer di 
+halaman ec2 ke browser, buka dengan port 3000(jika tidak muncul, tunggu 
+beberapa saat, cek ec2 sampai selesai initializing):
+○ dns_load_balancer:3000/books
+● Insert data ke dalam mysql melalui ec2(gunakan ssh), insert data dengan 
+menggunakan alamat mysql yang ada di 
+/home/admin/myapp/latihan_rds/.env, kemudian buka di browser
+○ dns_load_balancer:3000/books/1
+● stop ec2 pada availability zone a, tunggu sebentar sampai status stopped, 
+kemudian cek lagi di browser ke-2 langkah di atas
+Cek failover pada RDS
+● Lakukan reboot 
+(centang reboot 
+failover) pada RDS 
+instance, kemudian 
+cek pada secondary 
+zone, harusnya 
+berubah ke zona yang 
+lain (agak lama, 
+laukan refresh 
+berkala)
+● Cek kembali di 
+browser langkah pada 
+slide sebelumnya
+
+Install stress test
+● Login ke salah satu ec2
+● Install stress package:
+○ sudo apt update
+○ sudo apt upgrade
+○ sudo apt install stress
+● Jalankan stress test:
+○ sudo stress --cpu 2 --timeout 600
+● mengecek penggunaan cpu, buka terminal baru 
+○ top
+● Cek apakah jumlah instance ec2 bertambah di halaman aws, jika bertambah, 
+artinya auto scaling berhasil, karena salah satu ec2 menjalankan resource 
+yang tinggi karena stress test
+Cek error
+Masuk ssh ke ec2 menggunakan putty, setelah masuk, lihat log dengan 
+mengetikkan menggunakan command:
+cat /var/log/cloud-init-output.log
+destroy instance
+Perintah jika hanya ingin mendestroy salah satu instance ec2
+terraform destroy -target aws_instance.<NAME>
+Tugas
+● Buat laporan dari hasil percobaan● Screenshot pada AWS:○ VPC■ Subnet■ Route■ Router Association■ Load balancers■ Auto scaling group○ EC2■ Instance■ Security group○ RDS■ Database■ Subnet group■ Security group
+● Setelah semua praktikum selesai, lakukan:○ terraform destroy
+● Kumpulkan di https://drive.google.com/drive/folders/1Au7eKYfen94mw_U-btzDvey22WRcKXmf?usp=sharing

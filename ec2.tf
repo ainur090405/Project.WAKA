@@ -75,58 +75,7 @@ data "template_file" "user_data_pkm" {
   }
 }
 
-resource "aws_instance" "Latihan_ec2PKM" {
-  depends_on = [aws_db_instance.latihan_db_rds_pkm]
-
-  ami           = "ami-0ef6d0055be7553ee"
-  instance_type = "t3.micro"
-  key_name      = aws_key_pair.latihanKeyPairPKM.key_name
-
-  vpc_security_group_ids = [aws_security_group.latihan-security-group-PKM.id]
-  subnet_id              = aws_subnet.latihan_subnet_public_pkm.id
-
-  user_data = data.template_file.user_data_pkm.rendered
-
-  tags = {
-    Name = "Latihan-ec2PKM"
-  }
-}
-
 locals {
   loc_ami = "ami-0ef6d0055be7553ee"
   loc_instance = "t3.micro"
-}
-
-resource "aws_instance" "latihan_ec2PKM" {
-  depends_on = [aws_db_instance.latihan_db_rds_pkm]
-
-  ami           = local.loc_ami
-  instance_type = local.loc_instance
-  key_name      = aws_key_pair.latihanKeyPairPKM.key_name
-
-  vpc_security_group_ids = [aws_security_group.latihan-security-group-PKM.id]
-  subnet_id              = aws_subnet.latihan_subnet_public_pkm.id
-
-  user_data = data.template_file.user_data_pkm.rendered
-
-  tags = {
-    Name = "Latihan-ec2PKM"
-  }
-}
-
-resource "aws_instance" "latihan-ec2-2-PKM" {
-  depends_on = [aws_db_instance.latihan_db_rds_pkm]
-
-  ami           = local.loc_ami
-  instance_type = local.loc_instance
-  key_name      = aws_key_pair.latihanKeyPairPKM.key_name
-
-  vpc_security_group_ids = [aws_security_group.latihan-security-group-PKM.id]
-  subnet_id              = aws_subnet.latihan_subnet_public_pkm.id
-
-  user_data = data.template_file.user_data_pkm.rendered
-
-  tags = {
-    Name = "Latihan-ec2-2PKM"
-  }
 }

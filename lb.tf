@@ -7,27 +7,19 @@ resource "aws_lb" "latihan_lb" {
 }
 
 resource "aws_lb_target_group" "latihan_tg" {
-  name        = "latihan-tg"
-  port        = 8080
+  name        = "latihan-tg3"
+  port        = 3000
   protocol    = "HTTP"
   vpc_id      = aws_vpc.latihan_vpc_pkm.id
-}
 
-resource "aws_lb_target_group_attachment" "latihan-lb-tga1" {
-  target_group_arn = aws_lb_target_group.latihan_tg.arn
-  target_id        = aws_instance.latihan_ec2PKM.id
-  port             = 8080
-}
-
-resource "aws_lb_target_group_attachment" "latihan-lb-tga2" {
-  target_group_arn = aws_lb_target_group.latihan_tg.arn
-  target_id        = aws_instance.latihan-ec2-2-PKM.id
-  port             = 8080
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_lb_listener" "latihan_lb_listener" {
   load_balancer_arn = aws_lb.latihan_lb.arn
-  port                = "80"
+  port                = "3000"
   protocol            = "HTTP"
 
   default_action {
